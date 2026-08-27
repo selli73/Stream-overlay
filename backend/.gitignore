@@ -57,3 +57,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 node_modules
 bun.lock
 overlay_plan.md
+/src/generated/prisma

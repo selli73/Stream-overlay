@@ -2,7 +2,7 @@ import { Controller, Get, Post, Query, Redirect, Req, Res, UnauthorizedException
 import { UserService } from './user.service';
 import type { Request, Response } from 'express';
 
-@Controller('user')
+@Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -35,8 +35,8 @@ export class UserController {
     await this.userService.getAccessToken(code);
   }
 
-  @Get('update-access-token')
-  async accessTokenUpdate() {
-    await this.userService.accessTokenUpdate();
-  }
+  // @Get('update-access-token')
+  // async accessTokenUpdate() {
+  //   await this.userService.accessTokenUpdate();
+  // }
 }
