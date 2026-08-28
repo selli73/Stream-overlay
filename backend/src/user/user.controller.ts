@@ -10,9 +10,9 @@ export class UserController {
   @Redirect()
   login(@Res({ passthrough: true }) res: Response) {    
     const { url, state } = this.userService.getSpotifyAuthUrl();
-    
+
     res.cookie('spotify_state', state);
-  
+
     return {
       url,
       statusCode: 302
@@ -20,7 +20,7 @@ export class UserController {
   }
 
   @Get('/callback')
-  async callback(@Req() req: Request, @Query('code') code: string, @Query('state') state: string, @Query('error') error: string) {
+  async callback(@Req() req: Request, @Res() res: Response, @Query('code') code: string, @Query('state') state: string, @Query('error') error: string) {
     
     if (error) {
       throw new UnauthorizedException('Access denied');
@@ -32,7 +32,21 @@ export class UserController {
       throw new UnauthorizedException('Invalid state');
     }
 
-    await this.userService.getAccessToken(code);
+    const userData = await this.userService.getAccessRefreshTokenSpotify(code);
+    
+    const result = await this.userService.createUser(userData.accountId, userData.accountName, 
+      userData.spotifyAccessToken, userData.spotifyRefreshToken, userData.expiryDate);
+      
+    res.cookie('access_token', result?.access_token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 14
+    });
+    res.clearCookie('spotify_state');
+
+    return res.json({
+      message: 'Created'
+    });
   }
 
   // @Get('update-access-token')

@@ -1,19 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
-import { ISpotifyAuthUrl } from './interface/user';
+import { IResponseUpdateAccessToken, ISpotifyAuthUrl } from './typings/user';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiService } from '../api/api.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
 
     constructor(private _configService: ConfigService, private _prismaService: PrismaService,
-        private readonly _httpService: HttpService, private _apiService: ApiService) {}
+        private readonly _httpService: HttpService, private _apiService: ApiService, private _jwtService: JwtService) {}    
 
-    async getAccessToken(authorizationCode: string) {
+    async getAccessRefreshTokenSpotify(authorizationCode: string) {
         try {
             const { clientId, clientSecret } = this.getClientCredentials();
 
@@ -29,41 +30,96 @@ export class UserService {
                         'Authorization': 'Basic ' + (Buffer.from(clientId + ':' + clientSecret).toString('base64'))
                     }
                 }
-            ));     
+            ));
+
             const expiryDate = new Date();
             expiryDate.setSeconds(expiryDate.getSeconds() + response.data['expires_in']);
 
-            const { accountId, accountName } = await this._apiService.getMyProfile(response.data['access_token']);
-
-            await this.createUser(accountId, accountName, response.data['access_token'], response.data['refresh_token'], expiryDate);
+            const { accountId, accountName } = await this._apiService.getMyProfile(response.data['access_token']);      
+            
+            return {
+                accountId,
+                accountName,
+                spotifyAccessToken: response.data['access_token'],
+                spotifyRefreshToken: response.data['refresh_token'],
+                expiryDate
+            };           
         } catch(error) {
-            console.log(error);
+            if (error instanceof HttpException) {
+                throw new InternalServerErrorException(error.message);
+            }
+            throw new InternalServerErrorException('Server-side error');
         }
     }
 
-    private async createUser(accountId: string, accountName: string, accessToken: string, refreshToken: string, expiryDate: Date) {
+    async createUser(accountId: string, accountName: string, spotifyAccessToken: string, spotifyRefreshToken: string, expiryDate: Date) {
         try {
-            await this._prismaService.user.upsert({
+            const user = await this._prismaService.user.upsert({
                 where: {
                     spotifyUserId: accountId
                 },
                 create: {
                     spotifyUserId: accountId,
                     accountName,
-                    spotifyAccessToken: accessToken,
-                    spotifyRefreshToken: refreshToken,
+                    spotifyAccessToken,
+                    spotifyRefreshToken: spotifyRefreshToken,
                     expiryDate
                 },
                 update: {
                     accountName,
-                    spotifyAccessToken: accessToken,
-                    spotifyRefreshToken: refreshToken,
+                    spotifyAccessToken,
+                    spotifyRefreshToken: spotifyRefreshToken,
                     expiryDate
                 }
             });
-        } catch(error) {
-            console.log(error);
+
+            return this.generateToken(user.id);
+        } catch(error: any) {
+            if (error instanceof HttpException) {
+                throw new InternalServerErrorException(error.message);
+            }
+            throw new InternalServerErrorException('Server-side error');
         }        
+    }
+
+    async getValidAccessToken(userId: string) {
+        try {
+            const user = await this._prismaService.user.findUnique({
+                where: {
+                    id: userId
+                }
+            });
+
+            if (!user || !user.spotifyAccessToken) {
+                throw new UnauthorizedException('Вы не авторизованы')
+            }
+
+            const now = new Date();
+            now.setSeconds(now.getSeconds() + 45);
+
+            if (now >= user.expiryDate) {
+                // истек access_token
+                await this.accessTokenUpdate(user.spotifyRefreshToken);
+            } else {
+                // не истек
+            }
+        } catch(error) {
+            // if (error instanceof HttpException) {
+            //     throw new InternalServerErrorException(error.message);
+            // }
+            // throw new InternalServerErrorException('Server-side error');
+        }
+        
+    }
+
+    private generateToken(userId: string) {
+        const payload = {
+            sub: userId
+        };
+
+        return {
+            access_token: this._jwtService.sign(payload)
+        };
     }
 
     getSpotifyAuthUrl(): ISpotifyAuthUrl {        
@@ -88,25 +144,32 @@ export class UserService {
         };
     }
 
-    // async accessTokenUpdate() {
-    //     const refreshToken = 'my_fresh_token';
-    //     const { clientId, clientSecret } = this.getClientCredentials();
+    async accessTokenUpdate(refreshToken: string): Promise<IResponseUpdateAccessToken | undefined> {
+        try {
 
-    //     const response = await lastValueFrom(this._httpService.post('https://accounts.spotify.com/api/token', 
-    //         new URLSearchParams({
-    //             grant_type: 'refresh_token',
-    //             refresh_token: refreshToken
-    //         }),
-    //         {
-    //             headers: {
-    //                 'Content-Type': 'application/x-www-form-urlencoded',
-    //                 'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64')
-    //             }
-    //         }
-    //     ));
+            const { clientId, clientSecret } = this.getClientCredentials();
 
-    //     console.log(response.data);
-    // }
+            const response = await lastValueFrom(this._httpService.post('https://accounts.spotify.com/api/token', 
+                new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: refreshToken
+                }),
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64')
+                    }
+                }
+            ));
+
+
+            console.log(response);
+
+            return response.data;
+        } catch(error) {
+            console.log(error);
+        }
+    }
 
        
 }
