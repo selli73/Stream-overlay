@@ -1,38 +1,60 @@
-// import { Injectable } from "@nestjs/common";
+import { HttpService } from "@nestjs/axios";
+import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import axios from "axios";
+import { lastValueFrom } from "rxjs";
+import { SpotifyTokenService } from "./spotify-token.service";
 
-// @Injectable()
-// export class SpotifyApiService {
-//     async getMyProfileById(accessToken: string) {
-//         const spotifyAccessToken = await this.getValidAccessToken(userId);            
+@Injectable()
+export class SpotifyApiService {
 
-//         try {
-//             const response = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me', {
-//                 headers: {
-//                     'Authorization': 'Bearer ' + spotifyAccessToken
-//                 }
-//             }));
+    constructor(private _httpService: HttpService, private _spotifyTokenService: SpotifyTokenService) {}
 
-//             return response.data;
-//         } catch(error: unknown) {
-//             if (axios.isAxiosError(error) && error.response?.status === 401) {
-//                 // токен оказался невалидным раньше срока
-                
-//                 const updatedToken = await this.getValidAccessToken(userId, true);
+    async getProfile(spotifyAccessToken: string) {            
+        try {            
+            const response = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': 'Bearer ' + spotifyAccessToken
+                }
+            }));
+            return {
+                account_id: response.data.account_id,
+                display_name: response.data.display_name
+            };            
+        } catch(error: unknown) {
+            throw error;
+        }
+    }
 
-//                 const retryResponse  = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me', {
-//                     headers: {
-//                         'Authorization': 'Bearer ' + updatedToken
-//                     }
-//                 }));
+    async getProfileById(userId: string){
+        const spotifyAccessToken = await this._spotifyTokenService.getValidAccessToken(userId);
 
-//                 return retryResponse.data;
-//             }
+        try {
+            const response = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': 'Bearer ' + spotifyAccessToken
+                }
+            }));
 
-//             if (axios.isAxiosError(error) && error.response?.status === 403) {
-//                 throw new ForbiddenException('Контент недоступен в регионе аккаунта');                
-//             }
+            return response.data;
+        } catch(error: unknown) {
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                // токен оказался невалидным раньше срока                
+                const updatedToken = await this._spotifyTokenService.getValidAccessToken(userId, true);
 
-//             throw error;
-//         }
-//     } 
-// }
+                const retryResponse  = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + updatedToken
+                    }
+                }));
+
+                return retryResponse.data;
+            }
+
+            if (axios.isAxiosError(error) && error.response?.status === 403) {
+                throw new ForbiddenException('Контент недоступен в регионе аккаунта');                
+            }
+
+            throw error;
+        }
+    }
+}

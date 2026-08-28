@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserController } from './user.controller';
-import { ApiModule } from '../api/api.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwt } from './user.constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthController } from './auth.controller';
+import { SpotifyModule } from '../spotify/spotify.module';
 
 @Module({
   imports: [JwtModule.register({
@@ -12,9 +12,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     signOptions: {
       expiresIn: '14d'
     }
-  }), ApiModule],
-  controllers: [UserController],
+  }), SpotifyModule],
+  controllers: [AuthController],
   providers: [UserService, JwtStrategy],
   exports: [UserService]
 })
-export class UserModule {}
+export class AuthModule {}
