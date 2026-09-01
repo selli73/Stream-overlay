@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
+import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwt } from './user.constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -14,7 +14,7 @@ import { SpotifyModule } from '../spotify/spotify.module';
     }
   }), SpotifyModule],
   controllers: [AuthController],
-  providers: [UserService, JwtStrategy],
-  exports: [UserService]
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService]
 })
 export class AuthModule {}

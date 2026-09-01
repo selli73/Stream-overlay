@@ -59,3 +59,4 @@ bun.lock
 overlay_plan.md
 /src/generated/prisma
 /src/user/user.constants.ts
+/src/socket/frontend.constant.ts

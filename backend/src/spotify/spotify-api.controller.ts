@@ -12,4 +12,10 @@ export class SpotifyApiController {
     getProfile(@Req() req: IJwtUserRequest) {
         return this._spotifyApiService.getProfileById(req.user.userId);
     }
+
+    @Get('/me/player/currently-playing')
+    @UseGuards(JwtAuthGuard)
+    getCurrentlyPlaying(@Req() req: IJwtUserRequest) {
+        return this._spotifyApiService.getCurrentlyPlaying(req.user.userId)
+    }
 }

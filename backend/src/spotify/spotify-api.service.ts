@@ -1,5 +1,5 @@
 import { HttpService } from "@nestjs/axios";
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import axios from "axios";
 import { lastValueFrom } from "rxjs";
 import { SpotifyTokenService } from "./spotify-token.service";
@@ -46,6 +46,47 @@ export class SpotifyApiService {
                         'Authorization': 'Bearer ' + updatedToken
                     }
                 }));
+
+                return retryResponse.data;
+            }
+
+            if (axios.isAxiosError(error) && error.response?.status === 403) {
+                throw new ForbiddenException('Контент недоступен в регионе аккаунта');                
+            }
+
+            throw error;
+        }
+    }
+
+    async getCurrentlyPlaying(userId: string) {
+        const spotifyAccessToken = await this._spotifyTokenService.getValidAccessToken(userId);
+
+        try {
+            const response = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me/player/currently-playing', {
+                headers: {
+                    'Authorization': 'Bearer ' + spotifyAccessToken
+                }
+            }));
+
+            if (response.status === 204) {
+                return null;
+            }
+
+            return response.data;
+        } catch(error) {            
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+
+                const updatedToken = await this._spotifyTokenService.getValidAccessToken(userId, true);
+
+                const retryResponse = await lastValueFrom(this._httpService.get('https://api.spotify.com/v1/me/player/currently-playing', {
+                    headers: {
+                        'Authorization': 'Bearer ' + updatedToken
+                    }
+                }));
+
+                if (retryResponse.status === 204) {
+                    return null;
+                }
 
                 return retryResponse.data;
             }
