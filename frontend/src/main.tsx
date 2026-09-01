@@ -2,6 +2,7 @@ import { createContext } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import AuthStore from './store/AuthStore';
+import './index.css'
 
 interface State {
   authStore: AuthStore;

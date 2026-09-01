@@ -1,0 +1,178 @@
+.dashboard {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: #e1e1e6;
+    min-height: 100vh;
+}
+
+.dashboard-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #8b8b96;
+    font-size: 18px;
+}
+
+/* Header */
+
+.dashboard-header {
+    margin-bottom: 48px;
+}
+
+.dashboard-greeting h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #f0f0f5;
+}
+
+.dashboard-subtitle {
+    font-size: 16px;
+    color: #8b8b96;
+    margin: 0;
+}
+
+/* Overlay link section */
+
+.dashboard-overlay-section {
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+}
+
+.dashboard-overlay-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: #f0f0f5;
+}
+
+.section-desc {
+    font-size: 14px;
+    color: #8b8b96;
+    margin: 0 0 20px;
+}
+
+.overlay-url-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.overlay-url {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: #12121a;
+    border: 1px solid #2a2a36;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #c4c4cf;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+.copy-btn {
+    flex-shrink: 0;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #1db954;
+    color: #000;
+    transition: background 0.15s ease;
+}
+
+.copy-btn:hover {
+    background: #1ed760;
+}
+
+.copy-btn--copied {
+    background: #2a2a36;
+    color: #1db954;
+}
+
+.copy-btn--copied:hover {
+    background: #2a2a36;
+}
+
+/* Setup steps */
+
+.dashboard-setup-section {
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 12px;
+    padding: 28px;
+}
+
+.dashboard-setup-section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    color: #f0f0f5;
+}
+
+.setup-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.setup-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.step-number {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #24243a;
+    color: #1db954;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.step-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #e1e1e6;
+    margin: 0 0 2px;
+    line-height: 1.6;
+}
+
+.step-desc {
+    font-size: 13px;
+    color: #6b6b78;
+    margin: 0;
+}
+
+/* Mobile */
+
+@media (max-width: 540px) {
+    .dashboard {
+        padding: 32px 16px;
+    }
+
+    .dashboard-greeting h1 {
+        font-size: 24px;
+    }
+
+    .overlay-url-row {
+        flex-direction: column;
+    }
+}
