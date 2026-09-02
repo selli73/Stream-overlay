@@ -1,10 +1,11 @@
 import { io, type Socket } from "socket.io-client";
 import { API_URL } from "../http";
+import type { IPlaybackData } from "../typings";
 
 export default class SocketService {
     static socket: Socket | null = null;
 
-    static createConnection(streamerId: string) {
+    static createConnection(streamerId: string, onTrackChanged: (data: IPlaybackData) => void) {
         
         this.socket = io(`${API_URL}/overlay`, {
             retries: 3
@@ -15,8 +16,9 @@ export default class SocketService {
         });
 
 
-        this.socket.on('track_changed', (data) => {
+        this.socket.on('track_changed', (data: IPlaybackData) => {
             console.log(data);
+            onTrackChanged(data);
         })
     }
 
