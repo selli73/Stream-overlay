@@ -21,7 +21,7 @@ export const OverlayPage = () => {
 
     return (
         <div className='overlay' key={track.trackTitle}>
-            <img src={track.images.filter((value, index) => index === 1).toString()} alt={track.trackTitle} className='overlay-cover'/>
+            <img src={track.image} alt={track.trackTitle} className='overlay-cover'/>
             
             <div className="overlay-info">
                 <p className="overlay-track-name">{track.trackTitle}</p>

@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from "react"
 import { Context } from "../../main"
 import './DashboardPage.css';
+import axios from "axios";
+import { observer } from "mobx-react-lite";
 
 interface IUser {
     spotifyUserId: string;
@@ -8,18 +10,23 @@ interface IUser {
     createdAt: Date;
 }
 
-export const DashboardPage = () => {
-    const { authStore } = useContext(Context);
+export const DashboardPage = observer(() => {
+    const { authStore, sessionStore } = useContext(Context);
     const [user, setUser] = useState<IUser>();
     const [copied, setCopied] = useState(false);
+    const [error, setError] = useState('');
+    const [sessionLoading, setSessionLoading] = useState(false);
 
     const overlayUrl = user 
         ? `${window.location.origin}/overlay/${user.spotifyUserId}` 
         : '';
 
+    const isSessionActive = sessionStore.sessionStatus === 'active';
+
     useEffect(() => {
         const fetchProfile = async  () => {
             try {
+                console.log('1');
                 const data = await authStore.getProfile();
                 setUser(data);
             } catch(error) {
@@ -27,13 +34,43 @@ export const DashboardPage = () => {
             }
         }
 
+        const fetchSessionStatus = async () => {
+            try {
+                await sessionStore.getStatus();
+            } catch(error) {
+                console.log(error);
+            }
+        }
+
         fetchProfile();
+        fetchSessionStatus();
     }, []);
     
     const handleCopy = async () => {
         await navigator.clipboard.writeText(overlayUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleToggleSession = async () => {
+        setError('');
+        setSessionLoading(true);
+        try {
+            if (isSessionActive) {
+                await sessionStore.end();
+            } else {
+                await sessionStore.start();
+            }
+
+        } catch(error) {
+            if (axios.isAxiosError(error)) {
+                setError(error.response?.data.message || 'Не удалось запустить сессию');
+            } else {
+                setError('Произошла неизвестная ошибка');
+            }
+        } finally {
+            setSessionLoading(false);
+        }
     };
 
     if (!user) {
@@ -50,7 +87,27 @@ export const DashboardPage = () => {
                     </p>
                 </div>
             </header>
-
+ 
+            <section className="dashboard-session-section">
+                <div className="session-status-row">
+                    <span className={`session-badge ${isSessionActive ? 'session-badge--live' : ''}`}>
+                        {isSessionActive ? 'В эфире' : 'Не в эфире'}
+                    </span>
+                    <button
+                        className={`session-btn ${isSessionActive ? 'session-btn--end' : 'session-btn--start'}`}
+                        onClick={handleToggleSession}
+                        disabled={sessionLoading}
+                    >
+                        {sessionLoading
+                            ? 'Подождите...'
+                            : isSessionActive
+                                ? 'Завершить сессию'
+                                : 'Начать сессию'}
+                    </button>
+                </div>
+                {error && <p className="session-error">{error}</p>}
+            </section>
+ 
             <section className="dashboard-overlay-section">
                 <h2>Ссылка на оверлей</h2>
                 <p className="section-desc">
@@ -66,7 +123,7 @@ export const DashboardPage = () => {
                     </button>
                 </div>
             </section>
-
+ 
             <section className="dashboard-setup-section">
                 <h2>Как подключить</h2>
                 <div className="setup-steps">
@@ -101,5 +158,5 @@ export const DashboardPage = () => {
                 </div>
             </section>
         </div>
-    )
-}
+    );
+})

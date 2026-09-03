@@ -17,7 +17,6 @@ export default class SocketService {
 
 
         this.socket.on('track_changed', (data: IPlaybackData) => {
-            console.log(data);
             onTrackChanged(data);
         })
     }

@@ -3,20 +3,30 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import AuthStore from './store/AuthStore';
 import './index.css'
+import { SessionStore } from './store/SessionStore';
+import { TrackHistoryStore } from './store/TrackHistoryStore';
 
 interface State {
   authStore: AuthStore;
+  sessionStore: SessionStore;
+  trackHistoryStore: TrackHistoryStore
 }
 
 const authStore = new AuthStore();
+const sessionStore = new SessionStore();
+const trackHistoryStore = new TrackHistoryStore();
 
 export const Context = createContext<State>({
-  authStore
+  authStore,
+  sessionStore,
+  trackHistoryStore
 });
 
 createRoot(document.getElementById('root')!).render(
   <Context.Provider value={{
-      authStore
+      authStore,
+      sessionStore,
+      trackHistoryStore
     }}>
     <App />
   </Context.Provider>

@@ -1,11 +1,7 @@
 export interface IPlaybackData {    
     is_playing: boolean;
     progress_ms: number;    
-    images: [
-        {
-            url: string
-        }
-    ]
+    image: string
     artists: [
         {
             name: string
@@ -16,4 +12,13 @@ export interface IPlaybackData {
     ];
     duration_ms: number;
     trackTitle: string;
+}
+
+export interface ITrack {
+    id: string;
+    trackTitle: string;
+    spotifyTrackId: string;
+    artists: { name: string }[];
+    image: string;
+    timeAdded: string;
 }

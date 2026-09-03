@@ -35,6 +35,18 @@ export class AuthService {
         return user;
     }
 
+    getUserBySpotifyUserId(spotifyUserId: string) {
+        return this._prismaService.user.findUnique({
+            where: {
+                spotifyUserId
+            },
+            select: {
+                id: true,
+                accountName: true
+            }
+        });
+    }
+
     async streamerExists(spotifyUserId: string) {
         const streamer = await this._prismaService.user.findUnique({
             where: {

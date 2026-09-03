@@ -3,7 +3,6 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import axios from "axios";
 import { lastValueFrom } from "rxjs";
 import { SpotifyTokenService } from "./spotify-token.service";
-import { IPlaybackData } from "../polling/typings";
 
 @Injectable()
 export class SpotifyApiService {

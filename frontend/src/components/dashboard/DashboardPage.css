@@ -35,6 +35,73 @@
     margin: 0;
 }
 
+/* Session control section */
+
+.dashboard-session-section {
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 32px;
+}
+
+.session-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.session-badge {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b6b78;
+}
+
+.session-badge--live {
+    color: #1db954;
+}
+
+.session-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.session-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.session-btn--start {
+    background: #1db954;
+    color: #000;
+}
+
+.session-btn--start:hover:not(:disabled) {
+    background: #1ed760;
+}
+
+.session-btn--end {
+    background: #2a2a36;
+    color: #f0f0f5;
+    border: 1px solid #3a3a48;
+}
+
+.session-btn--end:hover:not(:disabled) {
+    background: #33333f;
+}
+
+.session-error {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: #f66;
+}
+
 /* Overlay link section */
 
 .dashboard-overlay-section {

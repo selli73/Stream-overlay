@@ -1,19 +1,9 @@
 export interface IPlaybackData {    
+    idTrack: string;
     is_playing: boolean;
     progress_ms: number;    
-    images: [
-        {
-            url: string
-        }
-    ]
-    artists: [
-        {
-            name: string
-        },
-        {
-            name: string
-        }
-    ];
+    image: string
+    artists: string[];
     duration_ms: number;
     trackTitle: string;
 }
