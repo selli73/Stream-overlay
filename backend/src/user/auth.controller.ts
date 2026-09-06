@@ -6,14 +6,16 @@ import { SpotifyApiService } from '../spotify/spotify-api.service';
 import type { IJwtUserRequest } from './typings/user';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly _authService: AuthService, private readonly _spotifyApiService: SpotifyApiService, private readonly _spotifyAuthService: SpotifyAuthService, 
     private _configService: ConfigService) {}
 
-  @Get('/login')
+  @Get('/login')  
   @Redirect()
+  @ApiExcludeEndpoint()
   login(@Res({ passthrough: true }) res: Response) {    
     const { url, state } = this._spotifyAuthService.getSpotifyAuthUrl();
 
@@ -28,8 +30,9 @@ export class AuthController {
     };
   }
 
-  @Get('/callback')
+  @Get('/callback')  
   @Redirect()
+  @ApiExcludeEndpoint()
   async callback(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Query('code') code: string, @Query('state') state: string, @Query('error') error: string) {    
     if (error) {
       throw new UnauthorizedException('Access denied');
@@ -65,6 +68,9 @@ export class AuthController {
 
   @Get('/me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' }) @ApiResponse({ status: 200, description: 'Profile successfully retrieved' })
   me(@Req() req: IJwtUserRequest) {
     return this._authService.getUser(req.user.userId);
   }
