@@ -8,6 +8,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { PollingModule } from './polling/polling.module';
 import { SessionModule } from './session/session.module';
 import { TrackHistoryModule } from './track-history/track-history.module';
+import { DonationAlertsModule } from './donation-alerts/donation-alerts.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -15,6 +16,6 @@ import { TrackHistoryModule } from './track-history/track-history.module';
   }), HttpModule.register({
     global: true
   }), ScheduleModule.forRoot(),
-  PrismaModule, AuthModule, SpotifyModule, PollingModule, SessionModule, TrackHistoryModule]
+  PrismaModule, AuthModule, SpotifyModule, PollingModule, SessionModule, TrackHistoryModule, DonationAlertsModule]
 })
 export class AppModule {}

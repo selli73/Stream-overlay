@@ -35,7 +35,7 @@ export class SpotifyAuthService {
         try {
             const { clientId, clientSecret } = this.getClientCredentials();
 
-            const response = await lastValueFrom(this._httpService.post('https://accounts.spotify.com/api/token', 
+             const response = await lastValueFrom(this._httpService.post('https://accounts.spotify.com/api/token', 
                 new URLSearchParams({            
                     code: authorizationCode,
                     redirect_uri: this._configService.getOrThrow('REDIRECT_URI'),

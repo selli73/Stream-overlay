@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { frontendIp, frontendUrl } from './socket/frontend.constant';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import ngrok from '@ngrok/ngrok';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,6 +13,12 @@ async function bootstrap() {
     credentials: true,
     origin: [frontendIp, frontendUrl]
   })
+
+  const listener = await ngrok.forward({
+    addr: 3000,
+    authtoken_from_env: true,
+    domain: process.env.NGROK_DOMAIN,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Stream-overlay')

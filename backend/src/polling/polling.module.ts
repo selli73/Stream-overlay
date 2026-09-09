@@ -9,5 +9,6 @@ import { SessionModule } from '../session/session.module';
 @Module({
   imports: [AuthModule, SpotifyModule, SessionModule, TrackHistoryModule],
   providers: [PollingService, SocketGateway],
+  exports: [SocketGateway]
 })
 export class PollingModule {}

@@ -7,15 +7,20 @@ datasource db {
 }
 
 model User {
-  id                  String          @id @default(uuid())
-  spotifyUserId       String          @unique
-  accountName         String
-  spotifyAccessToken  String
-  spotifyRefreshToken String
-  expiryDate          DateTime
-  streamSessions      StreamSession[]
-  updatedAt           DateTime        @updatedAt
-  createdAt           DateTime        @default(now())
+  id                         String          @id @default(uuid())
+  spotifyUserId              String          @unique
+  accountName                String
+  spotifyAccessToken         String
+  spotifyRefreshToken        String
+  expiryDate                 DateTime
+
+  donationAlertsAccessToken  String?
+  donationAlertsRefreshToken String?
+  donationAlertsExpiryDate   DateTime?
+
+  streamSessions             StreamSession[]
+  updatedAt                  DateTime        @updatedAt
+  createdAt                  DateTime        @default(now())
 }
 
 model StreamSession {

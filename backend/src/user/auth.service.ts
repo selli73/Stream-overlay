@@ -47,6 +47,18 @@ export class AuthService {
         });
     }
 
+    getUsersWithDonationAlerts() {
+        return this._prismaService.user.findMany({
+            where: {
+                NOT: { donationAlertsAccessToken: null }
+            },
+            select: {
+                id: true,
+                donationAlertsAccessToken: true                
+            }
+        });
+    }
+
     async streamerExists(spotifyUserId: string) {
         const streamer = await this._prismaService.user.findUnique({
             where: {
@@ -56,6 +68,37 @@ export class AuthService {
 
         return streamer !== null;
     }
+
+    async saveDonationAlertsTokens(userId: string, accessToken: string, refreshToken: string, expiryIn: number) {
+        
+        const existsUser = await this._prismaService.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                id: true
+            }
+        });
+
+        if (!existsUser) {
+            throw new NotFoundException('The user does not exist');
+        }
+
+        const expiryDate = new Date();
+        expiryDate.setMilliseconds(expiryDate.getSeconds() + expiryIn)
+
+        await this._prismaService.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                donationAlertsAccessToken: accessToken,
+                donationAlertsRefreshToken: refreshToken,
+                donationAlertsExpiryDate: expiryDate
+            }
+        });
+    }
+
 
     async createUser(accountId: string, accountName: string, spotifyAccessToken: string, spotifyRefreshToken: string, expiryDate: Date) {
         try {

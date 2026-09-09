@@ -31,7 +31,7 @@ export class PollingService {
             const lastTrackId = this._lastTracksId.get(spotifyUserId); 
             const trackData = this.mapTrackData(track);           
             if (currentTrackId !== lastTrackId) {
-                this._socketGateway.broadcast(spotifyUserId, trackData);
+                this._socketGateway.broadcast('track_changed', spotifyUserId, trackData);
                 
                 const session = await this._sessionService.getStatusSession(userId);
                 if (session.sessionId && trackData) {

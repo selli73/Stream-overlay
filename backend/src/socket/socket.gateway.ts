@@ -43,7 +43,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this._logger.log(`Клиент ${socket.id} подписался на стримера ${spotifyUserId}`);
     }
 
-    broadcast(spotifyUserId: string, trackData: any) {
-        this.server.to(spotifyUserId).emit('track_changed', trackData);
+    broadcast(event: string, spotifyUserId: string, trackData: any) {
+        this.server.to(spotifyUserId).emit(event, trackData);
     }
 }

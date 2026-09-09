@@ -22,3 +22,9 @@ export interface ITrack {
     image: string;
     timeAdded: string;
 }
+
+export interface IOrderedTrack {
+    subscriberName: string;
+    trackTitle: string;
+    amount: number;
+}
