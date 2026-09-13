@@ -4,11 +4,14 @@ import { DonationAlertsService } from "./donation-alerts.service";
 import { JwtAuthGuard } from "../user/guards/jwt-auth.guard";
 import type { IJwtUserRequest } from "../user/typings/user";
 import { AuthService } from "../user/auth.service";
+import { DonationTokenService } from "./donation-token.service";
 
 @Controller('donation-alerts')
 export class DonationAlertsController {
 
-    constructor(private _authService: AuthService, private _donationAlertsService: DonationAlertsService, private _configService: ConfigService) {}
+    constructor(private _authService: AuthService, private _donationAlertsService: DonationAlertsService, private _configService: ConfigService,
+        private _donationTokenService: DonationTokenService
+    ) {}
 
     @Get('/login')
     @Redirect()
@@ -27,15 +30,21 @@ export class DonationAlertsController {
     }
     
     @Get('/callback')
-    @UseGuards(JwtAuthGuard) 
+    @UseGuards(JwtAuthGuard)
+    @Redirect() 
     async callback(@Req() req: IJwtUserRequest, @Query('code') code: string) {            
         const { accessToken, refreshToken, expiresIn } = await this._donationAlertsService.exchangeCode(code); 
         await this._authService.saveDonationAlertsTokens(req.user.userId, accessToken, refreshToken, expiresIn);
-        const user =         
-        await this._donationAlertsService.connectUser(req.user.userId, accessToken);
+        
+        try {
+            await this._donationAlertsService.connectUser(req.user.userId);    
+        } catch(error) {             
+            return { message: 'DonationAlerts авторизован, но подключение к получению донатов не удалось. Попробуйте позже.' };
+        }        
 
         return {
-            message: 'DonationAlerts подключён'
-        };
-    }    
+            url: `${this._configService.getOrThrow('FRONTEND_URL')}/dashboard`,
+            statusCode: 302
+        }
+    }
 }

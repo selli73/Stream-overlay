@@ -14,7 +14,7 @@ export class SpotifyTokenService {
         });
 
         if (!user || !user.spotifyAccessToken) {
-            throw new UnauthorizedException('Вы не авторизованы')
+            throw new UnauthorizedException('Вы не авторизованы');
         }
 
         const isExpired = new Date() >= new Date(user.expiryDate.getTime() - 60000)

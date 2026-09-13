@@ -102,6 +102,40 @@
     color: #f66;
 }
 
+/* DonationAlerts section */
+
+.dashboard-donation-section {
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-bottom: 32px;
+}
+
+.dashboard-donation-section h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: #f0f0f5;
+}
+
+.donation-connect-btn {
+    flex-shrink: 0;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #1db954;
+    color: #000;
+    transition: background 0.15s ease;
+}
+
+.donation-connect-btn:hover {
+    background: #1ed760;
+}
+
 /* Overlay link section */
 
 .dashboard-overlay-section {

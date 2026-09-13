@@ -24,7 +24,10 @@ export class AuthService {
             select: {
                 spotifyUserId: true,
                 accountName: true,
-                createdAt: true
+                createdAt: true,
+                donationAlertsAccessToken: true,
+                donationAlertsRefreshToken: true,
+                donationAlertsExpiryDate: true
             }
         });
 
@@ -33,6 +36,23 @@ export class AuthService {
         }
 
         return user;
+    }
+
+    async checkingAuthDonAler(userId: string) {
+        const user = await this._prismaService.user.findUnique({
+            where: {
+                id: userId
+            },
+            select: {
+                donationAlertsAccessToken: true
+            }
+        });
+
+        if (!user) return null;
+
+        return {
+            donationAlertsConnected: !!user.donationAlertsAccessToken,
+        }
     }
 
     getUserBySpotifyUserId(spotifyUserId: string) {

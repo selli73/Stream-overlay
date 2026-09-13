@@ -6,4 +6,9 @@ export default class AuthStore {
         const response = await AuthService.getProfile();
         return response.data;
     }
+
+    async checkingAuthDonAlerts() {
+        const response = await AuthService.checkingAuthDonAlerts();
+        return response.data;
+    }
 }

@@ -74,4 +74,10 @@ export class AuthController {
   me(@Req() req: IJwtUserRequest) {
     return this._authService.getUser(req.user.userId);
   }
+  
+  @Get('/checkAuthDonAlerts')
+  @UseGuards(JwtAuthGuard)
+  checkingAuthDonAlerts(@Req() req: IJwtUserRequest) {
+    return this._authService.checkingAuthDonAler(req.user.userId);
+  }
 }

@@ -13,7 +13,9 @@ interface IUser {
 export const DashboardPage = observer(() => {
     const { authStore, sessionStore } = useContext(Context);
     const [user, setUser] = useState<IUser>();
+    const [donationAlertsConnected, setDonAlertsConnected] = useState<boolean>();
     const [copied, setCopied] = useState(false);
+    const [historyCopied, setHistoryCopied] = useState(false);
     const [error, setError] = useState('');
     const [sessionLoading, setSessionLoading] = useState(false);
 
@@ -21,12 +23,14 @@ export const DashboardPage = observer(() => {
         ? `${window.location.origin}/overlay/${user.spotifyUserId}` 
         : '';
 
-    const isSessionActive = sessionStore.sessionStatus === 'active';
+    const historyUrl = user
+        ? `${window.location.origin}/history/${user.spotifyUserId}`
+        : '';
 
+    const isSessionActive = sessionStore.sessionStatus === 'active';
     useEffect(() => {
         const fetchProfile = async  () => {
             try {
-                console.log('1');
                 const data = await authStore.getProfile();
                 setUser(data);
             } catch(error) {
@@ -42,14 +46,30 @@ export const DashboardPage = observer(() => {
             }
         }
 
+        const checkingAuthDonAlerts = async () => {
+            try {
+                const data = await authStore.checkingAuthDonAlerts();
+                setDonAlertsConnected(data.donationAlertsConnected);
+            } catch(error) {
+                console.log(error);
+            }
+        }
+
         fetchProfile();
         fetchSessionStatus();
+        checkingAuthDonAlerts();
     }, []);
     
     const handleCopy = async () => {
         await navigator.clipboard.writeText(overlayUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCopyHistory = async () => {
+        await navigator.clipboard.writeText(historyUrl);
+        setHistoryCopied(true);
+        setTimeout(() => setHistoryCopied(false), 2000);
     };
 
     const handleToggleSession = async () => {
@@ -73,6 +93,11 @@ export const DashboardPage = observer(() => {
         }
     };
 
+    const handleConnectDonationAlerts = () => {        
+        window.location.href = `${import.meta.env.VITE_API_BACKEND_URL}/donation-alerts/login`;
+    };
+
+
     if (!user) {
         return <div className="dashboard-loading">Загрузка...</div>;
     }
@@ -87,7 +112,6 @@ export const DashboardPage = observer(() => {
                     </p>
                 </div>
             </header>
- 
             <section className="dashboard-session-section">
                 <div className="session-status-row">
                     <span className={`session-badge ${isSessionActive ? 'session-badge--live' : ''}`}>
@@ -107,6 +131,26 @@ export const DashboardPage = observer(() => {
                 </div>
                 {error && <p className="session-error">{error}</p>}
             </section>
+
+            <section className="dashboard-donation-section">
+                <div className="session-status-row">
+                    <div>
+                        <h2>Донаты</h2>
+                        <p className="section-desc" style={{ margin: 0 }}>
+                            {donationAlertsConnected
+                                ? 'DonationAlerts подключён — заказ треков через донаты работает'
+                                : 'Подключи DonationAlerts, чтобы зрители могли заказывать треки'}
+                        </p>
+                    </div>
+                    {donationAlertsConnected ? (
+                        <span className="session-badge session-badge--live">Подключено</span>
+                    ) : (
+                        <button className="donation-connect-btn" onClick={handleConnectDonationAlerts}>
+                            Подключить DonationAlerts
+                        </button>
+                    )}
+                </div>
+            </section>
  
             <section className="dashboard-overlay-section">
                 <h2>Ссылка на оверлей</h2>
@@ -120,6 +164,22 @@ export const DashboardPage = observer(() => {
                         onClick={handleCopy}
                     >
                         {copied ? 'Скопировано' : 'Копировать'}
+                    </button>
+                </div>
+            </section>
+
+            <section className="dashboard-overlay-section">
+                <h2>Ссылка на историю треков</h2>
+                <p className="section-desc">
+                    Скопируй и поставь под стримом (например, в описании или через команду !history)
+                </p>
+                <div className="overlay-url-row">
+                    <code className="overlay-url">{historyUrl}</code>
+                    <button 
+                        className={`copy-btn ${historyCopied ? 'copy-btn--copied' : ''}`} 
+                        onClick={handleCopyHistory}
+                    >
+                        {historyCopied ? 'Скопировано' : 'Копировать'}
                     </button>
                 </div>
             </section>

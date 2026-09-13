@@ -14,11 +14,11 @@ async function bootstrap() {
     origin: [frontendIp, frontendUrl]
   })
 
-  const listener = await ngrok.forward({
-    addr: 3000,
-    authtoken_from_env: true,
-    domain: process.env.NGROK_DOMAIN,
-  });
+  // const listener = await ngrok.forward({
+  //   addr: 3000,
+  //   authtoken_from_env: true,
+  //   domain: process.env.NGROK_DOMAIN,
+  // });
 
   const config = new DocumentBuilder()
     .setTitle('Stream-overlay')

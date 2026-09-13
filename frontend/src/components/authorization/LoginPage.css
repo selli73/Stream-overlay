@@ -1,0 +1,94 @@
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0c0c12;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    padding: 24px;
+}
+
+.login-card {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 16px;
+    padding: 48px 36px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.login-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(29, 185, 84, 0.12);
+    color: #1db954;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    margin-bottom: 24px;
+}
+
+.login-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #f0f0f5;
+    margin: 0 0 12px;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #8b8b96;
+    margin: 0 0 32px;
+}
+
+.login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 24px;
+    background: #1db954;
+    color: #000;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.login-btn:hover {
+    background: #1ed760;
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+.login-btn-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.login-footer {
+    margin: 24px 0 0;
+    font-size: 12px;
+    color: #55555f;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 36px 24px;
+    }
+
+    .login-title {
+        font-size: 22px;
+    }
+}

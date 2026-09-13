@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 import Centrifuge from 'centrifuge';
@@ -7,6 +7,8 @@ import XHR2 from 'xhr2';
 import { AuthService } from '../user/auth.service';
 import { SpotifyApiService } from '../spotify/spotify-api.service';
 import { SocketGateway } from '../socket/socket.gateway';
+import { DonationTokenService } from './donation-token.service';
+import axios from 'axios';
 
 @Injectable()
 export class DonationAlertsService implements OnModuleInit {
@@ -15,22 +17,33 @@ export class DonationAlertsService implements OnModuleInit {
     private _logger = new Logger(DonationAlertsService.name);
 
     constructor(private _httpService: HttpService, private _configService: ConfigService, private _authService: AuthService, 
-        private _spotifyApiService: SpotifyApiService, private _socketGateway: SocketGateway) {}
+        private _spotifyApiService: SpotifyApiService, private _socketGateway: SocketGateway, private _donationTokenService: DonationTokenService) {}        
 
     async onModuleInit() {
         const users = await this._authService.getUsersWithDonationAlerts();
 
-        await Promise.allSettled(users.filter((user) => user.donationAlertsAccessToken).map((user) => { 
-            if (user.donationAlertsAccessToken) {
-                this.connectUser(user.id, user.donationAlertsAccessToken)
-            }            
-        }));
+        await Promise.allSettled(users.filter((user) => user.donationAlertsAccessToken).map((user) => this.connectUser(user.id).catch(error => {
+            this._logger.error(`Не удалось подключить юзера ${user.id} к DonationAlerts при старте:`, error);
+        })));
     }
 
-    async connectUser(userId: string, accessToken: string) {
-        const { donationAlertsUserId, socketConnectionToken } = await this.getSocketConnectionInfo(accessToken);
-        const centrifuge = await this.startListening(socketConnectionToken, accessToken, donationAlertsUserId, userId);
-        this._connections.set(userId, centrifuge as Centrifuge);
+    async connectUser(userId: string) {
+        try {
+            const accessToken = await this._donationTokenService.getValidDonAlertAccessToken(userId);
+
+            const { donationAlertsUserId, socketConnectionToken } = await this.getSocketConnectionInfo(accessToken);
+            const centrifuge = await this.startListening(socketConnectionToken, accessToken, donationAlertsUserId, userId);
+            this._connections.set(userId, centrifuge as Centrifuge);
+        } catch(error: unknown) {                 
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                const updatedToken = await this._donationTokenService.getValidDonAlertAccessToken(userId, true);
+                const { donationAlertsUserId, socketConnectionToken } = await this.getSocketConnectionInfo(updatedToken);
+                const centrifuge = await this.startListening(socketConnectionToken, updatedToken, donationAlertsUserId, userId);
+                this._connections.set(userId, centrifuge as Centrifuge);  
+                return;
+            }
+            throw error;
+        }        
     }
 
 
