@@ -24,7 +24,7 @@ export class TrackHistoryService {
         });
     }
 
-    async getStreamTracks(spotifyUserId: string) {
+    async getStreamTracks(spotifyUserId: string, page: number, limit: number) {
         const user = await this._authService.getUserBySpotifyUserId(spotifyUserId);
 
         if (!user) {
@@ -38,16 +38,29 @@ export class TrackHistoryService {
             throw new NotFoundException(`No completed streams found for user ${user.accountName}`);
         }
 
-        return this._prismaService.trackHistory.findMany({
-            where: { streamSessionId: session.id },
-            orderBy: { timeAdded: 'desc' },
-            include: {
-                artists: {
-                    select: {
-                        name: true
+        const [tracks, total] = [ 
+            await this._prismaService.trackHistory.findMany({
+                where: { streamSessionId: session.id },
+                orderBy: { timeAdded: 'desc' },
+                include: {
+                    artists: {
+                        select: {
+                            name: true
+                        }
                     }
-                }
-            }
-        });
+                },
+                skip: (page - 1) * limit,
+                take: limit
+            }),
+            await this._prismaService.trackHistory.count({ where: { streamSessionId: session.id } })
+        ];
+
+        const result = {
+            tracks,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+
+        return result;
     }
 }

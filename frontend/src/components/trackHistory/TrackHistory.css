@@ -15,6 +15,39 @@
     margin: 0 0 28px;
 }
 
+.history-load-more {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 13px;
+    background: #1a1a24;
+    border: 1px solid #2a2a36;
+    border-radius: 10px;
+    color: #e1e1e6;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.history-load-more:hover:not(:disabled) {
+    background: #1e1e29;
+    border-color: #3a3a48;
+}
+
+.history-load-more:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.history-load-error {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: #f66;
+    text-align: center;
+}
+
 /* Track list */
 
 .history-list {

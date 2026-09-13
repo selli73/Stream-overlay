@@ -1,3 +1,8 @@
+export interface IUser {
+    spotifyUserId: string;
+    accountName: string;
+    createdAt: Date;
+}
 export interface IPlaybackData {    
     is_playing: boolean;
     progress_ms: number;    
@@ -20,7 +25,13 @@ export interface ITrack {
     spotifyTrackId: string;
     artists: { name: string }[];
     image: string;
-    timeAdded: string;
+    timeAdded: string;    
+}
+
+export interface ITracks {
+    tracks: ITrack[];
+    total: number;
+    totalPages: number;
 }
 
 export interface IOrderedTrack {
