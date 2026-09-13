@@ -4,6 +4,7 @@ import { OverlayPage } from "./components/overlay/OverlayPage";
 import { TrackHistory } from "./components/trackHistory/TrackHistory";
 import { LoginPage } from "./components/authorization/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import './components/styles/animations.css'
 
 export default function App() {
     return (
