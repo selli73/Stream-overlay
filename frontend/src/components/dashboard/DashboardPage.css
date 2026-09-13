@@ -136,6 +136,34 @@
     background: #1ed760;
 }
 
+.donation-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.donation-disconnect-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #2a2a36;
+    color: #f0f0f5;
+    border: 1px solid #3a3a48;
+    transition: background 0.15s ease;
+}
+
+.donation-disconnect-btn:hover:not(:disabled) {
+    background: #33333f;
+}
+
+.donation-disconnect-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Overlay link section */
 
 .dashboard-overlay-section {

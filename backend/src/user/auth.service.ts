@@ -159,4 +159,22 @@ export class AuthService {
             access_token: this._jwtService.sign(payload)
         };
     }
+
+    async logoutDonationAlerts(userId: string) {
+        await this._prismaService.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                donationAlertsAccessToken: null,
+                donationAlertsExpiryDate: null,
+                donationAlertsRefreshToken: null
+            }
+        });
+
+        return {
+            status: 200,
+            message: 'You have successfully logged out of your account'
+        }
+    }
 }

@@ -11,4 +11,9 @@ export default class AuthStore {
         const response = await AuthService.checkingAuthDonAlerts();
         return response.data;
     }
+
+    async logoutDonationAlerts() {
+        const response = await AuthService.logoutDonationAlerts();
+        return response.data;
+    }
 }

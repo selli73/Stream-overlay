@@ -17,7 +17,7 @@ export class DonationTokenService {
         if (!user.donationAlertsAccessToken || !user.donationAlertsExpiryDate) {
             throw new UnauthorizedException('Вы не авторизованы в Donation Alerts');
         }
-
+        
         const isExpired = new Date() > new Date(user.donationAlertsExpiryDate.getTime() - 60000);
 
         if (!isExpired && !forceRefresh) {
@@ -57,7 +57,7 @@ export class DonationTokenService {
         }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, validateStatus: (status) => status === 200 || status === 401 }));
 
         if (response.status === 401) {
-            throw new UnauthorizedException('Donation alerts отклонил refresh token');
+            throw new UnauthorizedException('Refresh token потух, авторизуйтесь в DonationAlerts заново');
         }
         
         return {

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Redirect, Req, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
+import { Controller, Get, Post, Query, Redirect, Req, Res, UnauthorizedException, UseGuards} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { SpotifyAuthService } from '../spotify/spotify-auth.service';
@@ -79,5 +79,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   checkingAuthDonAlerts(@Req() req: IJwtUserRequest) {
     return this._authService.checkingAuthDonAler(req.user.userId);
+  }
+
+  @Post('/donationAlerts/logout')
+  @UseGuards(JwtAuthGuard)
+  logoutDonationAlerts(@Req() req: IJwtUserRequest) {
+    return this._authService.logoutDonationAlerts(req.user.userId);
   }
 }

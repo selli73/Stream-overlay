@@ -22,26 +22,28 @@ export class DonationAlertsService implements OnModuleInit {
     async onModuleInit() {
         const users = await this._authService.getUsersWithDonationAlerts();
 
-        await Promise.allSettled(users.filter((user) => user.donationAlertsAccessToken).map((user) => this.connectUser(user.id).catch(error => {
-            this._logger.error(`Не удалось подключить юзера ${user.id} к DonationAlerts при старте:`, error);
+        await Promise.allSettled(users.filter((user) => user.donationAlertsAccessToken).map((user) => this.connectUser(user.id).catch(async (error) => {
+            await this._authService.logoutDonationAlerts(user.id);
+            this._logger.error(`Не удалось подключить юзера ${user.id} к DonationAlerts при старте:`, error);            
         })));
     }
 
     async connectUser(userId: string) {
         try {
             const accessToken = await this._donationTokenService.getValidDonAlertAccessToken(userId);
-
+            
             const { donationAlertsUserId, socketConnectionToken } = await this.getSocketConnectionInfo(accessToken);
             const centrifuge = await this.startListening(socketConnectionToken, accessToken, donationAlertsUserId, userId);
             this._connections.set(userId, centrifuge as Centrifuge);
-        } catch(error: unknown) {                 
+        } catch(error: unknown) {               
             if (axios.isAxiosError(error) && error.response?.status === 401) {
                 const updatedToken = await this._donationTokenService.getValidDonAlertAccessToken(userId, true);
                 const { donationAlertsUserId, socketConnectionToken } = await this.getSocketConnectionInfo(updatedToken);
                 const centrifuge = await this.startListening(socketConnectionToken, updatedToken, donationAlertsUserId, userId);
                 this._connections.set(userId, centrifuge as Centrifuge);  
+                
                 return;
-            }
+            }            
             throw error;
         }        
     }

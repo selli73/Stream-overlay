@@ -18,6 +18,8 @@ export const DashboardPage = observer(() => {
     const [historyCopied, setHistoryCopied] = useState(false);
     const [error, setError] = useState('');
     const [sessionLoading, setSessionLoading] = useState(false);
+    const [donationLoading, setDonationLoading] = useState(false);
+    const [donationError, setDonationError] = useState('');
 
     const overlayUrl = user 
         ? `${window.location.origin}/overlay/${user.spotifyUserId}` 
@@ -97,6 +99,23 @@ export const DashboardPage = observer(() => {
         window.location.href = `${import.meta.env.VITE_API_BACKEND_URL}/donation-alerts/login`;
     };
 
+    const handleLogoutDonationAlerts = async () => {
+        setDonationError('');
+        setDonationLoading(true);
+        try {
+            await authStore.logoutDonationAlerts();
+            setDonAlertsConnected(false);
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                setDonationError(error.response?.data.message || 'Не удалось отключить DonationAlerts');
+            } else {
+                setDonationError('Произошла неизвестная ошибка');
+            }
+        } finally {
+            setDonationLoading(false);
+        }
+    };
+
 
     if (!user) {
         return <div className="dashboard-loading">Загрузка...</div>;
@@ -143,13 +162,23 @@ export const DashboardPage = observer(() => {
                         </p>
                     </div>
                     {donationAlertsConnected ? (
-                        <span className="session-badge session-badge--live">Подключено</span>
+                        <div className="donation-actions">
+                            <span className="session-badge session-badge--live">Подключено</span>
+                            <button
+                                className="donation-disconnect-btn"
+                                onClick={handleLogoutDonationAlerts}
+                                disabled={donationLoading}
+                            >
+                                {donationLoading ? 'Отключаем...' : 'Отключить'}
+                            </button>
+                        </div>
                     ) : (
                         <button className="donation-connect-btn" onClick={handleConnectDonationAlerts}>
                             Подключить DonationAlerts
                         </button>
                     )}
                 </div>
+                {donationError && <p className="session-error">{donationError}</p>}
             </section>
  
             <section className="dashboard-overlay-section">
