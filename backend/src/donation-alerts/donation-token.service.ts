@@ -4,12 +4,13 @@ import { ConfigService } from "@nestjs/config";
 import { lastValueFrom } from "rxjs";
 import { AuthService } from "../user/auth.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { EncryptionService } from "../encryption/encryption.service";
 
 
 @Injectable()
 export class DonationTokenService {
     constructor(private _httpService: HttpService, private _configService: ConfigService, 
-        private _authService: AuthService, private _prismaService: PrismaService) {}
+        private _authService: AuthService, private _prismaService: PrismaService, private _encryptionService: EncryptionService) {}
 
     async getValidDonAlertAccessToken(userId: string, forceRefresh = false): Promise<string> {
         const user = await this._authService.getUser(userId);
@@ -30,6 +31,9 @@ export class DonationTokenService {
         
         const { donAlertAccessToken, expiresIn, donAlertRefreshToken } = await this.accessTokenUpdate(user.donationAlertsRefreshToken);
 
+        const encryptedDonAlertAccessToken = this._encryptionService.encrypt(donAlertAccessToken);
+        const encryptedDonAlertRefreshToken = this._encryptionService.encrypt(donAlertRefreshToken);
+
         const expiryDate = new Date();
         expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
 
@@ -38,9 +42,9 @@ export class DonationTokenService {
                 id: userId
             },
             data: {
-                donationAlertsAccessToken: donAlertAccessToken,
+                donationAlertsAccessToken: encryptedDonAlertAccessToken,
                 donationAlertsExpiryDate: expiryDate,
-                donationAlertsRefreshToken: donAlertRefreshToken
+                donationAlertsRefreshToken: encryptedDonAlertRefreshToken
             }
         });
 
