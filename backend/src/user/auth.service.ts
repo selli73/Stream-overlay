@@ -1,11 +1,11 @@
 import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-
+import { EncryptionService } from '../encryption/encryption.service';
 @Injectable()
 export class AuthService {
 
-    constructor( private _prismaService: PrismaService, private _jwtService: JwtService) {}    
+    constructor( private _prismaService: PrismaService, private _jwtService: JwtService, private _encryptionService: EncryptionService) {}    
 
     getAllUsers() {
         return this._prismaService.user.findMany({
@@ -34,8 +34,14 @@ export class AuthService {
         if (!user) {
             throw new NotFoundException('The user does not exist')
         }
-
-        return user;
+        return {
+            spotifyUserId: user.spotifyUserId,
+            accountName: user.accountName,
+            donationAlertsAccessToken: user.donationAlertsAccessToken ? this._encryptionService.decrypt(user.donationAlertsAccessToken) : null,
+            donationAlertsRefreshToken: user.donationAlertsRefreshToken ? this._encryptionService.decrypt(user.donationAlertsRefreshToken) : null,
+            donationAlertsExpiryDate: user.donationAlertsExpiryDate,
+            createdAt: user.createdAt
+        };        
     }
 
     async checkingAuthDonAler(userId: string) {
@@ -67,8 +73,8 @@ export class AuthService {
         });
     }
 
-    getUsersWithDonationAlerts() {
-        return this._prismaService.user.findMany({
+    async getUsersWithDonationAlerts() {
+        const existsUsers = await this._prismaService.user.findMany({
             where: {
                 NOT: { donationAlertsAccessToken: null }
             },
@@ -77,6 +83,17 @@ export class AuthService {
                 donationAlertsAccessToken: true                
             }
         });
+
+        const users = existsUsers.map((user) => {
+            const decryptedDonationAlertsAccessToken = this._encryptionService.decrypt(user.donationAlertsAccessToken!);
+
+            return {
+                id: user.id,
+                donationAlertsAccessToken: decryptedDonationAlertsAccessToken
+            };
+        });
+
+        return users;
     }
 
     async streamerExists(spotifyUserId: string) {
@@ -91,6 +108,9 @@ export class AuthService {
 
     async saveDonationAlertsTokens(userId: string, accessToken: string, refreshToken: string, expiryIn: number) {
         
+        const encryptedDonAlerAccessToken = this._encryptionService.encrypt(accessToken);
+        const encryptedDonAlerRefreshToken = this._encryptionService.encrypt(refreshToken);
+
         const existsUser = await this._prismaService.user.findUnique({
             where: {
                 id: userId
@@ -112,8 +132,8 @@ export class AuthService {
                 id: userId
             },
             data: {
-                donationAlertsAccessToken: accessToken,
-                donationAlertsRefreshToken: refreshToken,
+                donationAlertsAccessToken: encryptedDonAlerAccessToken,
+                donationAlertsRefreshToken: encryptedDonAlerRefreshToken,
                 donationAlertsExpiryDate: expiryDate
             }
         });
@@ -121,7 +141,11 @@ export class AuthService {
 
 
     async createUser(accountId: string, accountName: string, spotifyAccessToken: string, spotifyRefreshToken: string, expiryDate: Date) {
-        try {
+        try {            
+
+            const encryptedSpotifyAccessToken = this._encryptionService.encrypt(spotifyAccessToken);
+            const encryptedSpotifyRefreshToken = this._encryptionService.encrypt(spotifyRefreshToken);
+
             const user = await this._prismaService.user.upsert({
                 where: {
                     spotifyUserId: accountId
@@ -129,14 +153,14 @@ export class AuthService {
                 create: {
                     spotifyUserId: accountId,
                     accountName,
-                    spotifyAccessToken,
-                    spotifyRefreshToken: spotifyRefreshToken,
+                    spotifyAccessToken: encryptedSpotifyAccessToken,
+                    spotifyRefreshToken: encryptedSpotifyRefreshToken,
                     expiryDate
                 },
                 update: {
                     accountName,
-                    spotifyAccessToken,
-                    spotifyRefreshToken: spotifyRefreshToken,
+                    spotifyAccessToken: encryptedSpotifyAccessToken,
+                    spotifyRefreshToken: encryptedSpotifyRefreshToken,
                     expiryDate
                 }
             });

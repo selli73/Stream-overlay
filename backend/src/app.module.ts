@@ -9,6 +9,7 @@ import { PollingModule } from './polling/polling.module';
 import { SessionModule } from './session/session.module';
 import { TrackHistoryModule } from './track-history/track-history.module';
 import { DonationAlertsModule } from './donation-alerts/donation-alerts.module';
+import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -16,6 +17,6 @@ import { DonationAlertsModule } from './donation-alerts/donation-alerts.module';
   }), HttpModule.register({
     global: true
   }), ScheduleModule.forRoot(),
-  PrismaModule, AuthModule, SpotifyModule, PollingModule, SessionModule, TrackHistoryModule, DonationAlertsModule]
+  PrismaModule, AuthModule, SpotifyModule, PollingModule, SessionModule, TrackHistoryModule, DonationAlertsModule, EncryptionModule]
 })
 export class AppModule {}
