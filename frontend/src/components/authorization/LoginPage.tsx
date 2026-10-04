@@ -1,10 +1,9 @@
-import { API_URL } from "../../http";
 import './LoginPage.css';
 
 export const LoginPage = () => {
         
     const handleLogin = () => {
-        window.location.href = `${API_URL}/auth/login`;
+        window.location.href = `http://127.0.0.1:3000/auth/login`;//`${API_URL}/auth/login`;
     }
 
     return (

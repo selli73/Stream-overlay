@@ -2,23 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { frontendIp, frontendUrl } from './socket/frontend.constant';
+import { frontendIp, frontendUrl, frontendIpNg, frontendUrlNg } from './socket/frontend.constant';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import ngrok from '@ngrok/ngrok';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: [frontendIp, frontendUrl]
+    origin: [frontendIp, frontendUrl, frontendIpNg, frontendUrlNg]
   })
-
-  // const listener = await ngrok.forward({
-  //   addr: 3000,
-  //   authtoken_from_env: true,
-  //   domain: process.env.NGROK_DOMAIN,
-  // });
 
   const config = new DocumentBuilder()
     .setTitle('Stream-overlay')

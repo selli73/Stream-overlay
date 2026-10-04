@@ -3,7 +3,7 @@ import axios from 'axios';
 export const API_URL = import.meta.env.VITE_API_BACKEND_URL;
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: 'http://127.0.0.1:3000',
     withCredentials: true
 });
 

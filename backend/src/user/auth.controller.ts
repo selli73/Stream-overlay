@@ -16,7 +16,7 @@ export class AuthController {
   @Get('/login')  
   @Redirect()
   @ApiExcludeEndpoint()
-  login(@Res({ passthrough: true }) res: Response) {    
+  login(@Res({ passthrough: true }) res: Response) {
     const { url, state } = this._spotifyAuthService.getSpotifyAuthUrl();
 
     res.cookie('spotify_state', state, {
