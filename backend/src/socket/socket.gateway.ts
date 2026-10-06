@@ -1,5 +1,5 @@
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
-import { frontendIp, frontendUrl }from "./frontend.constant";
+import { frontendIp, frontendUrl, frontendIpNg, frontendUrlNg }from "./frontend.constant";
 import { Server, Socket } from "socket.io";
 import { Logger } from "@nestjs/common";
 import { AuthService } from "../user/auth.service";
@@ -7,7 +7,7 @@ import { AuthService } from "../user/auth.service";
 
 @WebSocketGateway({
     cors: {
-        origin: [frontendIp, frontendUrl],
+        origin: [frontendIp, frontendUrl, frontendIpNg, frontendUrlNg],
         credentials: true
     },
     namespace: '/overlay'
